@@ -12,11 +12,10 @@ from google.appengine.ext import ndb
 from google.appengine.api import users
 
 from google.appengine.api import lib_config
-_config = lib_config.register('main', {'ADMIN_ID':None})
+_config = lib_config.register('main', {'ADMIN_ID':None, 'SENDER_EMAIL_ADDRESS':None})
 
 guestbook_key = ndb.Key('Guestbook', 'default_guestbook')
 member_key = ndb.Key('Member', 'default_member')
-admin_id = 'egoing@gmail.com'
 
 theme = [
  'netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css'
@@ -109,13 +108,13 @@ class Guestbook(CommonRequest):
     self.redirect('/')
 
 class Send_process(CommonRequest):  
-  global admin_id
-  def post(self):
+  global _config
+  def post(self):    
     if not super(Send_process, self).is_admin():
        self.redirect(users.create_login_url(self.request.uri))
     import json
     from google.appengine.api import mail
-
+    from google.appengine.ext import deferred
     title = self.request.get('title')
     message = self.request.get('message')
     if title and message:
@@ -124,13 +123,11 @@ class Send_process(CommonRequest):
       for member in members:
         if not mail.is_email_valid(member.email):
           continue
-        else:    
-          sender_list.append(member.email)
+        else:          
+          #mail.send_mail(sender = _config.SENDER_EMAIL_ADDRESS, to = member.email, subject = title, body = message)
+          deferred.defer(mail.send_mail, sender = _config.SENDER_EMAIL_ADDRESS, to = member.email, subject = title, body = message)
           member.notified = datetime.datetime.now()
-          member.put()
-      title = self.request.get('title')          
-      message = self.request.get('message')
-      mail.send_mail(sender = 'egoing@gmail.com', to = admin_id, bcc = ','.join(sender_list), subject = title, body = message)
+          member.put()      
       self.response.out.write(json.dumps({'result':True, 'data':None, 'msg':None, 'errorCode':None}))
     else:      
       self.response.out.write(json.dumps({'result':False, 'data':None, 'msg':'parameter quantity is wrong', 'errorCode':1}))
@@ -192,4 +189,3 @@ app = webapp2.WSGIApplication([
 
 def main():
   logging.getLogger().setLevel(logging.INFO)
-  logging.info(admin_id)

@@ -78,7 +78,7 @@
     </div>
     <script>
       $('body').keypress(function(e){
-        if(e.keyCode !== 113)
+        if(e.charCode !== 113)
           return true;
         var t = e.target.tagName.toLowerCase();        
         if(t != 'input' && t != 'textarea') {
