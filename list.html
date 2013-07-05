@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+{% autoescape true %}
+
+        <table class="table table-hover">
+          <tr>
+            <th>닉네임</th>
+            <th>이메일</th>
+            <th>지역</th>
+            <th>댓글</th>
+          </tr>
+          {% for member in members %}
+          <tr class="member_tr" data-id="{{ member.key.id() }}">
+            <td>{{ member.nickname }}</td>
+            <td>{{ member.email }}</td>
+            <td>{{ member.region }}</td>
+            <td>{{ member.comment }} <br />가입:{{ member.created }}, 공지:{{ member.notified }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+        <script>          
+          $('.member_tr').click(function(){
+              if(!confirm('삭제합니까?'))
+                return false;
+              $this = $(this);
+              $.post('/delete_process', {'id':$this.attr('data-id')}, function(data){
+                if(data.result){
+                  $this.remove()
+                } else {
+                  alert('삭제에 실패 했습니다. '+data.msg)
+                }
+              },'json')
+          })
+        </script>
+{% endautoescape %}
+{% endblock %}

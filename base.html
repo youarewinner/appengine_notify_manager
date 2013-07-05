@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>생활코딩 소식</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Bootstrap -->
+    <link href="http://{{ theme }}" rel="stylesheet" />
+
+    <link href="/static/style.css" rel="stylesheet" />    
+    <script src="http://code.jquery.com/jquery.js"></script>
+  </head>
+  <body>
+    <div class="navbar navbar-static-top">
+      <div class="navbar-inner">
+        <div class="container">
+     
+          {% if is_admin %}              
+          <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          {% endif %}
+     
+          <!-- Be sure to leave the brand out there if you want it shown -->
+          <a class="brand" href="#">생활코딩소식</a>
+     		
+          {% if is_admin %}              
+          <!-- Everything you want hidden at 940px or less, place within here -->
+          <div class="nav-collapse collapse">
+            <!-- .nav, .navbar-search, .navbar-form, etc -->
+            
+            <ul class="nav">
+              
+              <li class="">
+                <a href="/list">목록</a>
+              </li>
+              <li class="">
+                <a href="/">등록</a>
+              </li>
+              <li>
+                <a data-toggle="modal" href="#notify" data-backdrop="true">소식발행</a>
+              </li>              
+            </ul>
+            
+          </div>
+          {% endif %}
+        </div>
+      </div>      
+    </div>
+    <!-- Modal -->
+    <div id="notify" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="myModalLabel">메일발송</h3>
+      </div>
+      <div class="modal-body">
+        <form action="" class="form" id="notify_form">
+          <div class="control-group">
+            <label class="control-label" for="title">제목</label>
+            <div class="controls">
+              <input type="text" class="input-block-level" id="title" name="title" />
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="message">본문</label>
+            <div class="controls">
+              <textarea name="message" id="message" class="input-block-level" rows="4"></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">닫기</button>
+        <button class="btn btn-primary" id="send">전송</button>
+      </div>
+    </div>
+    <script>
+      $('body').keypress(function(e){
+        if(e.keyCode !== 113)
+          return true;
+        var t = e.target.tagName.toLowerCase();        
+        if(t != 'input' && t != 'textarea') {
+          location.href='{{ login_url }}'
+        }
+      })
+      $("#send").click(function(){
+        $.post('/send_process', $('#notify_form').serialize(), function(data){
+          if(data.result){
+            alert('발송했습니다.');                
+          } else {
+            alert('발송에 실패 했습니다. '+data.msg)
+          }
+        }, 'json')            
+      })
+    </script>
+    <div class="container content">{% block content %}{% endblock %}
+    </div>  
+    <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+  </body>
+  </html>    
