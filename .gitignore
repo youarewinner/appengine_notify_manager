@@ -34,5 +34,6 @@ nosetests.xml
 .project
 .pydevproject
 
-app.yaml
-appengine_config.py
+
+/appengine_config.py
+/app.yaml
