@@ -88,7 +88,7 @@
       $("#send").click(function(){
         $.post('/send_process', $('#notify_form').serialize(), function(data){
           if(data.result){
-            alert('발송했습니다. 발송한 이메일의 수 : '+data.data);                
+            alert('발송했습니다.');                
           } else {
             alert('발송에 실패 했습니다. '+data.msg)
           }

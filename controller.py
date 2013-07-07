@@ -115,6 +115,31 @@ class Process(CommonRequest):
     member.put()
     self.response.out.write(json.dumps({'result':True, 'data':None, 'msg':None, 'errorCode':None}))    
 
+def send_mail(host, title, message, admin_email):
+  import json, urllib
+  from google.appengine.api import mail
+  from google.appengine.ext import deferred
+  members = Member.query().fetch()
+  successed = 0
+  failed = 0
+  for member in members:
+    if not mail.is_email_valid(member.email):
+      failed += 1
+      continue
+    else:          
+      try:
+        query = urllib.urlencode({'email':member.email, 'token':member.token})
+      except UnicodeEncodeError:
+        failed += 1
+        logging.info('UnicodeEncodeError : ' + member.email)            
+        continue
+      unsubscribe_link = u'<a href="https://%s/unsubscribe?%s">구독취소</a>' % (host, query)
+      mail.send_mail(sender = _config.SENDER_EMAIL_ADDRESS, to = member.email, subject = title, body = message, html = message+'<br /><br />'+unsubscribe_link)
+      member.notified = datetime.datetime.now()
+      member.put()
+      successed += 1
+  mail.send_mail(sender = _config.SENDER_EMAIL_ADDRESS, to = admin_email, subject = '이메일 발송을 완료 했습니다.', body = '성공 : %d, 실패 : %d' % (successed, failed))
+
 class Send_process(CommonRequest):  
   global _config
   def post(self):    
@@ -127,23 +152,8 @@ class Send_process(CommonRequest):
     message = self.request.get('message')
     send_number = 0
     if title and message:
-      members = Member.query().fetch()
-      sender_list = []
-      for member in members:
-        if not mail.is_email_valid(member.email):
-          continue
-        else:          
-          try:
-            query = urllib.urlencode({'email':member.email, 'token':member.token})
-          except UnicodeEncodeError:
-            logging.info('UnicodeEncodeError : ' + member.email)            
-            continue
-          unsubscribe_link = u'<a href="https://%s/unsubscribe?%s">구독취소</a>' % (self.request.host, query)
-          deferred.defer(mail.send_mail, sender = _config.SENDER_EMAIL_ADDRESS, to = member.email, subject = title, body = message, html = message+'<br /><br />'+unsubscribe_link)
-          member.notified = datetime.datetime.now()
-          member.put()
-          send_number += 1
-      self.response.out.write(json.dumps({'result':True, 'data':send_number, 'msg':None, 'errorCode':None}))
+      deferred.defer(send_mail, self.request.host, title, message, users.get_current_user().email())      
+      self.response.out.write(json.dumps({'result':True, 'data':None, 'msg':None, 'errorCode':None}))
     else:
       self.response.out.write(json.dumps({'result':False, 'data':None, 'msg':'parameter quantity is wrong', 'errorCode':1}))
 
