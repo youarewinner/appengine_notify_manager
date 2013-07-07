@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+{% autoescape true %}
+        <div class="alert alert-block">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          <h4>Warning!</h4>
+          {{ message }}
+          <br />
+          <a href="/">홈으로</a>
+        </div>        
+{% endautoescape %}
+{% endblock %}

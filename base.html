@@ -4,10 +4,10 @@
     <title>생활코딩 소식</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Bootstrap -->
-    <link href="http://{{ theme }}" rel="stylesheet" />
+    <link href="https://{{ theme }}" rel="stylesheet" />
 
     <link href="/static/style.css" rel="stylesheet" />    
-    <script src="http://code.jquery.com/jquery.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
   </head>
   <body>
     <div class="navbar navbar-static-top">
@@ -88,7 +88,7 @@
       $("#send").click(function(){
         $.post('/send_process', $('#notify_form').serialize(), function(data){
           if(data.result){
-            alert('발송했습니다.');                
+            alert('발송했습니다. 발송한 이메일의 수 : '+data.data);                
           } else {
             alert('발송에 실패 했습니다. '+data.msg)
           }
@@ -97,6 +97,6 @@
     </script>
     <div class="container content">{% block content %}{% endblock %}
     </div>  
-    <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+    <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
   </body>
   </html>    
